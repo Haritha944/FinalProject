@@ -1,7 +1,7 @@
 import pyotp
 from datetime import datetime, timedelta
 from django.db.models.signals import Signal
-from ecom import settings  # Importing settings.py from a package
+from eccom import settings  # Importing settings.py from a package
 from django.conf import settings
 # Access variables or configurations defined in settings.py
 # piExample usage: accessing a variable from settings.py

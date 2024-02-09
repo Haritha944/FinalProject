@@ -2,7 +2,6 @@ from django.shortcuts import render,redirect
 from django.views.decorators.cache import never_cache
 from math import ceil
 from django.db.models import Q
-from .forms import SignupForm,LoginForm
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
