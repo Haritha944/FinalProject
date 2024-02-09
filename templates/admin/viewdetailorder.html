@@ -1,0 +1,155 @@
+{% extends 'admin/adminmain.html' %}
+{% load static %}
+{% block styles %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+{% endblock %}
+{% block content%}
+
+
+<div class="container" style="height: 50%;">
+    <div class="box" style="flex: 1;min-width: 200px;margin: 10px;padding: 20px;border: 1px solid #ccc;
+    position: relative;">
+        <!-- Content for the first div -->
+        <h2 class="head-main text-center">ORDER ADDRESS</h2>
+        <div class="inner-box" >
+            <table >
+                <tr>
+                    <td>Username</td>
+                    <td>: {{order.user.name}}</td>
+                </tr>
+                <tr>
+                    <td>Phone Number</td>
+                    <td>: {{order.user.mobile}}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>: {{order.user.email}}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td>: {{order.address.house_no}} {{order.address.village_name}}</td>
+                </tr>
+                <tr>
+                    <td>District</td>
+                    <td>: {{order.address.district}}</td>
+                </tr>
+                <tr>
+                    <td>Country</td>
+                    <td>: {{order.address.country}}</td>
+                </tr>
+                <tr>
+                    <td>State</td>
+                    <td>: {{order.address.state}}</td>
+                </tr>
+                <tr>
+                    <td>Pin Code</td>
+                    <td>: {{order.address.postal_code}}</td>
+                </tr>
+                <tr>
+                    <td>Order Note</td>
+                    <td>: {{order.message}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="box">
+        <!-- Content for the second div -->
+       
+        <div class="inner-box mt-3"style="flex: 1;min-width: 200px;margin: 10px;padding: 20px;border: 1px solid #ccc;
+        position: relative;">
+        <h2 class="text-center ">ORDER DETAILS</h2>
+       
+        <table class="table text-start align-middle table-bordered table-hover mb-0 table-stripped">
+            <thead>
+                <tr class="text-dark">
+                    <th scope="col">Order Number</th>
+                    <th scope="col">Product Details</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Payment Details </th>
+                    <th scope="col">Ordered Date</th>
+                    <th scope="col">Price Details</th>
+                    {% if order.status == 'Return requested' %}
+                    <th scope="col">
+                        Action
+                    </th>
+                    {% endif %}
+                   
+                </tr>
+            </thead>
+        <tbody>
+            {% for order in order_item %}
+            <tr>
+                <td>{{forloop.counter}}  {{order.order.tracking_no}}</td>
+                <td>{{order.product.product_name}}
+                    <p>Quantity: {{order.quantity}}</p><p>Colour:{{order.variant.color}}</p>
+                </td>
+                <td>
+                    <img src="{{ order.product.images.url }}" alt="{{ order.product.product_name }}" width="100"> 
+                </td>
+                <td>{{order.order.status}}</td>
+                <td>{{order.order.payment.payment_method}}</td>
+                <td>{{order.order.created_at}}</td>
+                <td>{{order.price}} </td>
+                {% if order.status == 'Return requested' %}
+                <td> <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Return requested.!
+                </button>
+                </td>
+                {% endif %}
+               
+                {% endfor %}
+            </tr>
+            <tr>
+                <td colspan="5"></td>
+                <td>Total Tax:</td>
+                <td>{{tax}}</td>
+                
+            </tr>
+            {% if discount != 0 %}
+            <tr>
+                <td colspan="5"></td>
+                <td>Discount:</td>
+                <td>{{discount}}</td>
+                
+            </tr>
+            {% endif %}
+            <tr>
+                <td colspan="5"></td>
+                <td>Grand Total:</td>
+                <td>{{grand_total}}</td>
+                
+            </tr>
+            
+            
+        </tbody>
+    </table>
+                
+        </div>
+    </div>
+</div>
+<!--Modal Return-->
+{% for item in order_item %}
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Return request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'order:returnapprove' item.order.id  %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="fs-5">I am request to cancel order {{item.order.tracking_no}}</div>
+                    <p>{{item.order.return_reason}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Approve</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

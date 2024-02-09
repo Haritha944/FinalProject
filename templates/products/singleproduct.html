@@ -1,0 +1,291 @@
+{% extends 'user/base.html' %}
+{% load static %}
+
+{% block title %}
+Singleproduct
+{% endblock %}
+<link rel="stylesheet" href="{% static 'css/imagecrop/image.css' %}" type="text/css">
+<style>
+
+ .zoom-container {
+    position: relative;
+    overflow: hidden;
+}
+
+ .product__details__pic__item--large {
+    transition: transform 0.2s ease;
+}
+
+ .product__details__pic__item--large:hover {
+    transform: scale(1.2);
+    cursor: zoom-in;
+}
+</style>
+
+{% block content %}
+   <!-- Single Page Header start -->
+   <div class="container-fluid page-header py-5 m-0"  >
+    <nav aria-label="breadcrumb" style="background-image: url('{% static '/images/breadcrumb.jpg' %}'); background-size: cover; width:100%; height:250px;">
+    <h1 class="text-center text-dark display-6 m-2"></h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item active"><a class="text-decoration-none text-dark" href="{% url 'user:index' %}">Home</a></li>
+        <li class="breadcrumb-item"><a class="text-decoration-none text-dark" href="{% url 'products:viewshop'%}">Shop</a></li>
+        <li class="breadcrumb-item active text-dark">Product Detail</li>
+    </ol>
+</nav>
+</div>
+<section class="product-details spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7 col-md-7">
+                
+                <div class="product__details__pic">
+                    <div class="image-container">
+                        <img class="product__details__pic__item--large" src="/media/{{product.product.images}}" alt=""
+                             style="width:400px;!important" id="bbb" onclick="enlargeImage('/media/{{product.product.images}}')">
+                        <div id="zoom-lens" class="zoom-lens"></div>
+                    </div>
+                    <div class="d-flex">
+                        {% for image in images %}
+                        <div class="zoom-container" >
+                            <img src="/media/{{image.image}}" alt="" width="150px" height="150px" id="aaa"
+                                 onclick="swapImages(this); enlargeImage('/media/{{image.image}}', 'bbb')" style="position: relative;
+                                 overflow: hidden;">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-5">
+              
+                <div class="row my-4">
+                        <h3>{{product.product.product_name}}</h3>
+                        <div class="text">
+                            <span class="price fs-4 text-danger fw-bold">₹ {{product.product.discount_price}}</span>
+                            <del class="price-old text-dark fs-4 mx-3 ">₹ {{product.product.original_price}}</del>
+                          </div>
+                        <p class="my-3">{{product.product.description}}.</p>
+                        
+                    </div>
+                    <div class="featured-icons mt-2">
+                        {% if variant.stock == 0 or product.stock == 0 %}
+                        <p class="text-danger">Out of Stock</p>
+                        {% else %}
+                        <a href="{% url 'cart:addcart' product.id %}" class="text-decoration-none btn btn-block px-5 py-2" style="background-color:#E9967A;">Add Cart</a>
+                        <a href="{% url 'dashboard:addwishlist' variant_id=product.id%}" class="text-decoration-none mx-4"><i class="fa fa-heart fs-3 "style="color:#E9967A;" title="Add to Wishlist"></i></a>
+                        {% endif %}
+                      </div>
+                   </button>
+                <div class="row">
+                    <div class="item-option-select mt-3">
+                        <h6>Choose Size</h6>
+                        <div class="form-group col-md-6 mx-1">
+                            <select class="form-control" name="variant" id="variant-dropdown" required>
+
+                                {% for variant in variants %}
+                                <option value="{{ variant.id }}"
+                                        data-price="{{ variant.original_price }}">
+                                    {{ variant.size }} {{ variant.unit }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                 </div>
+
+                <div class="row">
+                    <div class="item-option-select mt-3">
+                        <h6>Choose Color</h6>
+                        <div class="form-group col-md-6 mx-1">
+                            <select class="form-control" name="variant" id="variant-dropdown" required>
+
+                                {% for variant in variants %}
+                                <option value="{{ variant.id }}"
+                                        data-price="{{ variant.original_price }}">
+                                    {{ variant.color }} 
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="item-option-select mt-3">
+                        <h4>Product Details</h4>
+                        <div class="form-group col-md-6 justify-content">
+                            {% for variant in variants %}
+                            <p class="fs-6">Colour :  {{ variant.color }}</p>   
+                            <p class="fs-6">Size   :   {{ variant.size }} </p>   
+                            <p class="fs-6">Material : {{ variant.material }} </p>   
+                                {% endfor %}
+                          
+                        </div>
+                    </div>
+                </div>
+               
+                  
+            </div><!--Col end-->
+                  
+          
+          <div class="col-lg-12">
+            <!--Tab start-->
+            <div class="product__details__tab">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab"
+                           aria-selected="true">Description</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
+                           aria-selected="false">Reviews </a>
+                    </li>
+                </ul>
+                <div class="tab-content"><!--tab content-->
+                    <div class="tab-pane active" id="tabs-1" role="tabpanel"><!--description-->
+                        <div class="product__details__tab__desc">
+                            <h6 class="mt-5">Products Infomation</h6>
+                            <p class="my-4">{{product.product.description}}.</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabs-3" role="tabpanel"><!--review-->
+                    </div>
+                </div>
+            </div>
+          </div>
+          <!--You may like Products -->
+          <!-- Related Product Section Begin -->
+<section class="related-product">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 mt-3">
+                <div class="section-title related__product__title">
+                    <h2 class="text-center mt-4">Related products </h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {% for product in similar_product %}
+            <div class="col-md-3 mt-4 position-relative">
+                <div class="card mx-1" style="width:15rem;border:none" >
+                    <a href="{% url 'products:singleproductview' product_id=product.id %}">
+                        <img src="/media/{{product.product.images}}" class="card-img-top" alt="" ></a>
+                <div class="card-body text-center">
+                  <h6 class="card-title text-center" id="namepr{{product.id}}">{{product.product.product_name}}</h6>
+                  <div class="text-center">
+                    <span class="price fw-bold">₹ {{product.discount_price}}</span>
+                    
+                  </div>
+                  <div class="featured-icons mt-2">
+                    <a href="{% url 'cart:addcart' product.id %}" class="text-decoration-none btn btn-block px-3"style="background-color:#E9967A;">Add Cart</a>
+                    <a href="{% url 'dashboard:addwishlist' variant_id=product.id%}" class="text-decoration-none mx-2"><i class="fa fa-heart fs-5"style="color:#E9967A;" title="Add to Wishlist"></i></a>
+                  </div>
+                </div>
+              </div>
+              </div>
+           
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Related Product Section End -->
+   <!-- Like Product Section Begin -->
+<section class="related-product">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 mt-4">
+                <div class="section-title related__product__title">
+                    <h2 class="text-center mt-4">You may also like </h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {% for product in like_product %}
+            <div class="col-md-3 mt-4 position-relative">
+                <div class="card mx-1" style="width:15rem;border:none" >
+                    <a href="{% url 'products:singleproductview' product_id=product.id %}">
+                        <img src="/media/{{product.product.images}}" class="card-img-top" alt="" ></a>
+                <div class="card-body text-center">
+                  <h6 class="card-title text-center" id="namepr{{product.id}}">{{product.product.product_name}}</h6>
+                  <div class="text-center">
+                    <span class="price fw-bold">₹ {{product.discount_price}}</span>
+                    
+                  </div>
+                  <div class="featured-icons mt-2">
+                    <a href="#" class="text-decoration-none btn btn-block px-3"style="background-color:#E9967A;">Add Cart</a>
+                    <a href="{% url 'dashboard:addwishlist' variant_id=product.id%}" class="text-decoration-none mx-2"><i class="fa fa-heart fs-5"style="color:#E9967A;" title="Add to Wishlist"></i></a>
+                  </div>
+                </div>
+              </div>
+              </div>
+           
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Like Product Section End -->
+
+           
+        
+        </div>
+    </div>
+</section>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+   var previousImageUrl = null;
+
+  function swapImages(clickedImage) {
+    var clickedImageUrl = clickedImage.getAttribute('src');
+    var bbbImage = document.getElementById('bbb');
+    var aaaImage = document.getElementById('aaa');
+    
+    var bbbImageUrl = bbbImage.getAttribute('src');
+    
+    clickedImage.setAttribute('src', bbbImageUrl);
+    bbbImage.setAttribute('src', clickedImageUrl);
+    }
+    
+  function swapImages(imageElement) {
+    var bbbImage = document.getElementById('bbb');
+    var imageUrl = imageElement.getAttribute('src');
+    bbbImage.setAttribute('src', imageUrl);
+    }
+    
+    function enlargeImage(imageUrl) {
+        var enlargedImage = document.getElementById('enlarged-image');
+
+        if (enlargedImage) {
+            // If the enlarged image already exists, remove it
+            document.body.removeChild(enlargedImage);
+        } else {
+            // If the enlarged image doesn't exist, create and display it
+            enlargedImage = document.createElement('div');
+            enlargedImage.innerHTML = '<img src="' + imageUrl + '" class="img-fluid rounded" alt="Enlarged Image"  style="padding: 10px; max-width: 100vw; max-height: 100vh; background:white; border:2px solid black;"> ';
+            enlargedImage.id = 'enlarged-image';
+            enlargedImage.style.position = 'fixed';
+            enlargedImage.style.top = '0';
+            enlargedImage.style.left = '0';
+            enlargedImage.style.width = '100%';
+            enlargedImage.style.height = '100%';
+            enlargedImage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            enlargedImage.style.display = 'flex';
+            enlargedImage.style.alignItems = 'center';
+            enlargedImage.style.justifyContent = 'center';
+            enlargedImage.style.zIndex = '1000';
+            enlargedImage.onclick = function () {
+                // Clicking anywhere on the overlay will close it
+                document.body.removeChild(enlargedImage);
+            };
+            document.body.appendChild(enlargedImage);
+        }
+    }
+    
+  
+</script>
+
+{% endblock %}
