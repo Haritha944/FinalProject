@@ -61,7 +61,7 @@ def viewshop(request):
                                                                         discount_price__lte=maxamount)
             if filter_size is None:
                 filter_size = 0
-        paginator = Paginator(products_within_price_range, 16)
+        paginator = Paginator(products_within_price_range, 26)
         page_number = request.GET.get('page', 1)
         products_within_price_range = paginator.get_page(page_number)
         sub_cat = Category.objects.filter(is_visible=True)

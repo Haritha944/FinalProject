@@ -266,7 +266,7 @@ def deletereferral(request,program_id):
     refers.delete()
     return redirect('dashboard:add_referral_program')
 
-
+@login_required
 def myrefer(request):
     if request.user.is_authenticated:
         user=request.user

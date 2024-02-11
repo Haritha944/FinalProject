@@ -738,11 +738,11 @@ def render_to_pdf(template_path, context_dict):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
+
 def sales_report_pdf_download(request):
     if request.method == "POST":
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
-        print(f"Start Date: {start_date}, End Date: {end_date}")
         if start_date and end_date:
             order = Order.objects.filter(created_at__range=(start_date, end_date), total_price__gt=0)
         else:
