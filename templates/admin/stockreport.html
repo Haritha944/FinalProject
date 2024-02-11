@@ -22,7 +22,11 @@
                 <td>{{ product.product.category }}</td>
                 <td>{{ product.product.subcategory }}</td>
                 <td><img src="/media/{{product.product.images}}" alt="{{ product.product_name }}" width="100"></td>
-                <td>{{ product.stock }}</td>
+                <td>{% if product.stock == 0 %}
+                    <span style="color: red;">Out of Stock
+                  {% else %}
+                    {{ product.stock }}
+                  {% endif %}</td>
             </tr>
         {% endfor %}
     </tbody>
