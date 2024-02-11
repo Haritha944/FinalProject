@@ -820,8 +820,13 @@ def callback(request):
     
     return render(request, 'order/sucessorder.html',{'order':order})
         
-    
-       
+def stock_report(request):
+    stock = ProductVariant.objects.all()
+    context={
+        'stock':stock,
+    }
+
+    return render(request,'admin/stockreport.html',context)      
 
     
     
