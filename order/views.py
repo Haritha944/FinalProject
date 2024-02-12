@@ -36,7 +36,6 @@ def _cart_id(request):
 @login_required   
 def razorpaid(request,tracking_no):
     user=request.user
-    print("hii",user)
     try:
         order = Order.objects.get(tracking_no=tracking_no, user=user)
         order_id = order.id
@@ -141,9 +140,6 @@ def orderinvoice(request,order_id):
     order = Order.objects.get(id=order_id)
     order_items = OrderItem.objects.filter(order=order,user=user)
     payment = Payment.objects.filter(order=order,user=user)
-    #cart_id = _cart_id(request)
-    #cart = Cart.objects.get(cart_id=cart_id)
-   #cart_items = CartItem.objects.filter(cart=cart,is_active=True).order_by('id')
     cart_items = CartItem.objects.filter(user=user)
     total = 0
     tax = 0
@@ -186,7 +182,6 @@ def myorder(request):
 @login_required        
 def myorderdetail(request,order_id):
     user=request.user  
-    print(user)
     email = request.user
     user = User.objects.get(email=email)
     order = Order.objects.get(id=order_id)
@@ -223,7 +218,6 @@ def cancelorder(request,order_item_id):
         order.status = 'Cancelled'
         order.save()
         order_items = OrderItem.objects.filter(order=order)
-        print(order.payment.payment_method)
         if order.payment.payment_method == 'Razorpay' or order.payment.payment_method == 'Wallet':
             email = request.user
             user = User.objects.get(email=email)
@@ -248,7 +242,6 @@ def cancelorder(request,order_item_id):
 def vieworder(request):
     if request.method=="POST":
         status=request.POST.get('status')
-        print(status)
         if status == 'status' or status == 'all':
             orders = Order.objects.filter(payment__isnull=False).order_by('-id')
         else:
@@ -286,7 +279,7 @@ def viewsingleadmin(request, order_id):
         total=subtotal
     tax = (2 * total) / 100
     grand_total = total + tax 
-    # user.wallet = user.wallet+order.total_price
+    
     user.save()
     context = {
         'order': order,
@@ -298,7 +291,7 @@ def viewsingleadmin(request, order_id):
         'total':total,
         'grand_total': grand_total,
         
-        # 'order_return_message': order_return_message
+        
     }
     return render(request, 'admin/viewdetailorder.html', context)
 
@@ -331,25 +324,11 @@ def updatestatus(request, order_id, new_status):
             item.save()
         order.status = new_status
         order.save()
-    
-    
-        if order.status == 'Returned':
-            email = order.user.email
-            user = User.objects.get(email=email)
-            userwallet = UserWallet()
-            userwallet.user = user
-            userwallet.amount += order.total_price
-            userwallet.transaction = 'Credited'
-            userwallet.save()
-            user.save()
         order_item = OrderItem.objects.filter(order=order)
         context = {
                 'order': order,
                 'order_item': order_item
         }
-    
-    #messages.success(request, f"Order #{order.tracking_no} has been updated to '{new_status}' status.")
-    
         return render(request, 'admin/viewdetailorder.html',context)
     except:
         pass
@@ -389,6 +368,24 @@ def returnapprove(request,order_id):
     for item in order_item:
         item.status = "Returned"
         item.save()
+    if order.status == "Returned":
+        if order.payment.payment_method == 'Razorpay' or order.payment.payment_method == 'Wallet':
+            user = order.user
+            userwallet = UserWallet()
+            userwallet.user = user
+            if userwallet is not None:
+                latest_userwallet  = UserWallet.objects.filter(user=user, transaction='Credited').order_by('-created_at').values('amount').first()
+                latest_amount = latest_userwallet['amount'] if latest_userwallet else 0
+                userwallet.amount = latest_amount + order.total_price
+                userwallet.transaction = 'Credited'
+                userwallet.save()
+            else:
+    
+                userwallet = UserWallet.objects.create(user=user, amount=order.total_price, transaction='Credited')
+                userwallet.save()
+            user.save() 
+        else:
+            pass
     context = {
         'order' : order,
         'order_item' : order_item,
@@ -424,8 +421,6 @@ def walletpay(request,order_id):
     try:
         wallet = UserWallet.objects.filter(user=user).order_by('-created_at').first()
     except:
-        #wallet = UserWallet.objects.create(user=request.user,amount=0)
-        #wallet.save()
         pass
     if wallet.amount >= order.total_price:
         payment = Payment.objects.create(user=request.user,payment_method='Wallet',amount_paid=order.total_price,status='Paid')
@@ -437,7 +432,6 @@ def walletpay(request,order_id):
         cart_id = _cart_id(request)
         cart = Cart.objects.get(cart_id=cart_id)
         cart_items = CartItem.objects.filter(cart=cart,is_active=True).order_by('id')
-        print(cart_items)
         for cart_item in cart_items:
             variant=cart_item.variant
             stock=variant.stock-cart_item.quantity
@@ -581,8 +575,7 @@ def applycoupon(request):
                             cart_item.variant.discount_price = updated_total
                             cart_item.save()
 
-                        #used_coupons = UserCoupons(user=request.user, coupon=coupon, is_used=True)
-                        #used_coupons.save()
+                        
                         messages.success(request, 'Coupon applied successfully!')
 
                         return redirect('cart:cart')
@@ -592,7 +585,7 @@ def applycoupon(request):
                 messages.warning(request, 'Coupon is not Applicable for the current date')
         except ObjectDoesNotExist:
             messages.warning(request, 'Coupon code is Invalid')
-            #return redirect('cart:cart')
+            
            
 
     return redirect('cart:cart')
@@ -634,8 +627,6 @@ def pdf_download(request,id):
         response = HttpResponse(pdf, content_type='application/pdf')
         filename = "Invoice_%s.pdf" % (cont['order'])
         content = "inline; filename='%s'" % (filename)
-        # download = request.GET.get("download")
-        # if download:
         content = "attachment; filename=%s" % (filename)
         response['Content-Disposition'] = content
         return response
@@ -645,7 +636,7 @@ def render_to_pdf(template_src, context_dict=None):
     template = get_template(template_src)
     html  = template.render(context_dict)
     result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     return None
@@ -666,15 +657,14 @@ class GenerateInvoice(View):
             'cart_items': neworderitems
         }
         pdf = render_to_pdf('order/orderconfirm.html', data)
-        # return HttpResponse(pdf, content_type='application/pdf')
+        
 
-        # force download
+       
         if pdf:
             response = HttpResponse(pdf, content_type='application/pdf')
             filename = "Invoice_%s.pdf" % (order.id)
             content = "inline; filename='%s'" % (filename)
-            # download = request.GET.get("download")
-            # if download:
+           
             content = "attachment; filename=%s" % (filename)
             response['Content-Disposition'] = content
             return response
@@ -690,7 +680,7 @@ def salesreport(request):
         start_date=request.POST.get('start_date')
         end_date=request.POST.get('end_date')
         if start_date==end_date:
-            print(start_date)
+            
             orders = Order.objects.filter(created_at__date=start_date)
         else:
             orders = Order.objects.filter(created_at__range=(start_date, end_date))
@@ -732,7 +722,7 @@ def render_to_pdf(template_path, context_dict):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="Sales_report.pdf"'
 
-    # Create a PDF with xhtml2pdf
+   
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
@@ -776,11 +766,6 @@ def callback(request):
     print(paymentt,request.user)
     razorpay_payment_id = request.POST.get("razorpay_payment_id")
     signature_id = request.POST.get("razorpay_signature")
-
-    print(razorpay_payment_id,signature_id)
-    #payment.razor_pay_id=razorpay_payment_id
-    #order.payment.payment_method="Razorpay"
-    #order.payment.save()
     payment_object = Payment.objects.create(
         user = order.user,
         razor_pay_id = razorpay_payment_id,
@@ -800,14 +785,11 @@ def callback(request):
         order = Order.objects.get(id=order_id)
         payment = Payment.objects.get(order=order) 
         payment_id = request.POST.get("razorpay_payment_id")
-        print('hiii')
         order_id = request.POST.get("razorpay_order_id")
         signature_id = request.POST.get("razorpay_signature")
         payment.razor_pay_id=payment_id
         payment.payment_method="Razorpay"
         payment.signature_id = signature_id
-        print(payment.razor_pay_id)
-        print(payment.signature_id)
         payment.save()
         if verify_signature(request.POST):
             order.payment.status = "SUCCESS"

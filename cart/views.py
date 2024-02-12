@@ -174,7 +174,6 @@ def editaddress(request,address_id):
                 email=request.user
                 user=User.objects.get(email=email)
                 addrss = Address.objects.get(user_id=user,is_default=True)
-                print(addrss)
                 addrss.is_default = False
                 addrss.save()
             except Address.DoesNotExist:
@@ -198,9 +197,9 @@ def addaddress(request):
     if default_address == 'on':
         try:
             adrss = Address.objects.get(user_id=user, is_default=True)
-            print(adrss)
+            
             adrss.is_default = False
-            print(adrss.is_default)
+            
             adrss.save()
         except Address.DoesNotExist:
             pass
@@ -240,14 +239,14 @@ def checkout(request,total=0,quantity=0,cart_items=None):
     try:
         email = request.POST.get('email')
         user=User.objects.get(user=request.user,email=email)
-        print(user)
+        
         if user is not None:
             cart_items = CartItem.objects.filter(user_id=user.id, is_active=True).order_by('id')
     except:
         cart_id = _cart_id(request)
         cart = Cart.objects.get(cart_id=cart_id)
         cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('id')
-        print(cart_items)
+        
            
         for cart_item in cart_items:
             total += (cart_item.variant.discount_price * cart_item.quantity)
@@ -267,7 +266,7 @@ def checkout(request,total=0,quantity=0,cart_items=None):
         else:
             value=total
     
-            #del request.session['coupon_code']          
+                
         tax = (2 * value) / 100
         grand_total = value + tax
        
@@ -285,7 +284,6 @@ def checkout(request,total=0,quantity=0,cart_items=None):
         'cart_items': cart_items,
         'tax': tax,
         'discount':discount,
-        #'selected_address': selected_address,
         'address_list':address_list,
         'default_address': default_address,
     }

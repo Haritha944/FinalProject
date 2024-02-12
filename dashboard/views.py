@@ -51,13 +51,13 @@ def admindashboard(request):
 
        current_year = timezone.now().year
 
-        # Calculate monthly sales for the current year
+        
        monthly_sales = Order.objects.filter(
             created_at__year=current_year
         ).annotate(month=ExtractMonth('created_at')).values('month').annotate(total_sales=Sum('total_price')).order_by(
             'month')
 
-        # Create a dictionary to hold the monthly sales data
+        
        monthly_sales_data = {month: 0 for month in range(1, 13)}
 
        for entry in monthly_sales:
@@ -83,9 +83,8 @@ def admindashboard(request):
 @never_cache
 def adminlogout(request):
     if request.user.is_authenticated:
-        print("User is authenticated. Logging out...")
         logout(request)
-        print("User logged out.")
+       
     return redirect('/adminlogin/')
 
 
@@ -156,7 +155,7 @@ def addwishlist(request,variant_id):
         else:
             wishlist = Wishlist.objects.create(user=request.user,variant=variant)
             wishlist.save()
-           # messages.success(request,'Product is added to your wishlist.')
+           
         return redirect('user:index')
     except Exception as e:
         print(e)
@@ -167,7 +166,7 @@ def addwishlist(request,variant_id):
 def removewish(request,wish_id):
     try:
         wishlist_item = Wishlist.objects.get(id=wish_id, user=request.user)
-        wishlist_item.delete()  # Remove the wishlist item
+        wishlist_item.delete()  
     except Wishlist.DoesNotExist:
         pass
     wishlist = Wishlist.objects.filter(user=request.user)
@@ -191,8 +190,6 @@ def addwishcart(request,wish_id):
 
 @login_required(login_url='/adminlogin/')
 def get_sales_revenue(request):
-    # Replace this with your actual data retrieval logic
-    # Example mock data
     orders=Order.objects.filter(status='Delivered')
     order_count = orders.count()
     total_amount=0
@@ -206,7 +203,7 @@ def get_sales_revenue(request):
         ).annotate(month=ExtractMonth('created_at')).values('month').annotate(total_sales=Sum('total_price')).order_by(
             'month')
     
-        # Create a dictionary to hold the monthly sales data
+        
     monthly_sales_data = {month: 0 for month in range(1, 13)}
 
     for entry in monthly_sales:
@@ -231,13 +228,12 @@ def add_referral_program(request):
         description = request.POST.get('description', '')
         new_user_amount = float(request.POST.get('new_user_amount'))
         referred_user_amount = float(request.POST.get('referred_user_amount'))
-        # Create the referral program with the provided data
         ReferralAmount.objects.create(
             description=description,
             new_user_amount=new_user_amount,
              referred_user_amount = referred_user_amount 
         )
-        # Redirect to a success page or perform other actions
+       
         return redirect('dashboard:add_referral_program')
     context = {
         'referral_programs': referral_programs,

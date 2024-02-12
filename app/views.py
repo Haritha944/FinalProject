@@ -258,8 +258,6 @@ def handlelogin(request):
     if request.method =="POST":
         email = request.POST.get('email')
         password = request.POST.get('password')
-        #hashed_password = make_password(password)
-        #print(hashed_password)
         user = authenticate(request, email=email, password=password)
         print(user)
         if user is not None:
