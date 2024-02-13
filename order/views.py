@@ -258,6 +258,7 @@ def vieworder(request):
         }
         return render(request, 'admin/vieworder.html', context)
     
+@login_required(login_url='/adminlogin/')    
 def viewsingleadmin(request, order_id):
     order = Order.objects.get(id=order_id)
     order_item = OrderItem.objects.filter(order=order)
