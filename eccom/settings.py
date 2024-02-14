@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-jka_cw)bfsr$&jghlz^fjy3stl3wya0w%za=jiqcutj^(#+h#6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['34.228.30.163','*']
 
 LOGIN_REDIRECT_URL = 'user:index'
 LOGIN_URL = '/login/'
@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'eccom.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME' :'project',
-        'USER':'postgres',
-        'PORT':'5432',
-        'PASSWORD':'sreevedh',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME' :'myproject',
+        'USER':'myprojectuser',
+        'PORT':'',
+        'PASSWORD':'password',
         'HOST':'localhost',
     }
 }
